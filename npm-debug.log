@@ -1,0 +1,109 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\node.exe',
+1 verbose cli   'C:\\Users\\phuongtq\\AppData\\Roaming\\npm\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'owner',
+1 verbose cli   'add',
+1 verbose cli   'tranphuong.080@gmail.com' ]
+2 info using npm@3.3.4
+3 info using node@v5.0.0
+4 verbose owner add tranphuong.080@gmail.com to react-native-android-exoplayer
+5 silly mapToRegistry name -/user/org.couchdb.user:tranphuong.080@gmail.com
+6 silly mapToRegistry using default registry
+7 silly mapToRegistry registry https://registry.npmjs.org/
+8 silly mapToRegistry uri https://registry.npmjs.org/-/user/org.couchdb.user:tranphuong.080@gmail.com
+9 verbose request uri https://registry.npmjs.org/-/user/org.couchdb.user:tranphuong.080@gmail.com
+10 verbose request new user, so can't send auth
+11 info attempt registry request try #1 at 4:59:49 PM
+12 verbose request using bearer token for auth
+13 verbose request id 8660db1c7d9d9e40
+14 http request GET https://registry.npmjs.org/-/user/org.couchdb.user:tranphuong.080@gmail.com
+15 http 200 https://registry.npmjs.org/-/user/org.couchdb.user:tranphuong.080@gmail.com
+16 verbose headers { 'content-type': 'application/json',
+16 verbose headers   'content-encoding': 'gzip',
+16 verbose headers   'cache-control': 'max-age=0',
+16 verbose headers   'transfer-encoding': 'chunked',
+16 verbose headers   'accept-ranges': 'bytes',
+16 verbose headers   date: 'Thu, 23 Jun 2016 09:59:51 GMT',
+16 verbose headers   via: '1.1 varnish',
+16 verbose headers   connection: 'keep-alive',
+16 verbose headers   'x-served-by': 'cache-sin6920-SIN',
+16 verbose headers   'x-cache': 'MISS',
+16 verbose headers   'x-cache-hits': '0',
+16 verbose headers   'x-timer': 'S1466675990.748212,VS0,VE541' }
+17 silly get cb [ 200,
+17 silly get   { 'content-type': 'application/json',
+17 silly get     'content-encoding': 'gzip',
+17 silly get     'cache-control': 'max-age=0',
+17 silly get     'transfer-encoding': 'chunked',
+17 silly get     'accept-ranges': 'bytes',
+17 silly get     date: 'Thu, 23 Jun 2016 09:59:51 GMT',
+17 silly get     via: '1.1 varnish',
+17 silly get     connection: 'keep-alive',
+17 silly get     'x-served-by': 'cache-sin6920-SIN',
+17 silly get     'x-cache': 'MISS',
+17 silly get     'x-cache-hits': '0',
+17 silly get     'x-timer': 'S1466675990.748212,VS0,VE541' } ]
+18 verbose get saving undefined to C:\Users\phuongtq\AppData\Roaming\npm-cache\registry.npmjs.org\-\user\org.couchdb.user_3Atranphuong.080_40gmail.com\.cache.json
+19 silly mapToRegistry name react-native-android-exoplayer
+20 silly mapToRegistry using default registry
+21 silly mapToRegistry registry https://registry.npmjs.org/
+22 silly mapToRegistry uri https://registry.npmjs.org/react-native-android-exoplayer
+23 verbose request uri https://registry.npmjs.org/react-native-android-exoplayer
+24 verbose request no auth needed
+25 info attempt registry request try #1 at 4:59:51 PM
+26 verbose request using bearer token for auth
+27 http request GET https://registry.npmjs.org/react-native-android-exoplayer
+28 http 404 https://registry.npmjs.org/react-native-android-exoplayer
+29 verbose headers { 'content-type': 'application/json',
+29 verbose headers   'cache-control': 'max-age=0',
+29 verbose headers   'content-length': '2',
+29 verbose headers   'accept-ranges': 'bytes',
+29 verbose headers   date: 'Thu, 23 Jun 2016 09:59:52 GMT',
+29 verbose headers   via: '1.1 varnish',
+29 verbose headers   connection: 'keep-alive',
+29 verbose headers   'x-served-by': 'cache-sin6920-SIN',
+29 verbose headers   'x-cache': 'MISS',
+29 verbose headers   'x-cache-hits': '0',
+29 verbose headers   'x-timer': 'S1466675992.137218,VS0,VE250',
+29 verbose headers   vary: 'Accept-Encoding' }
+30 silly get cb [ 404,
+30 silly get   { 'content-type': 'application/json',
+30 silly get     'cache-control': 'max-age=0',
+30 silly get     'content-length': '2',
+30 silly get     'accept-ranges': 'bytes',
+30 silly get     date: 'Thu, 23 Jun 2016 09:59:52 GMT',
+30 silly get     via: '1.1 varnish',
+30 silly get     connection: 'keep-alive',
+30 silly get     'x-served-by': 'cache-sin6920-SIN',
+30 silly get     'x-cache': 'MISS',
+30 silly get     'x-cache-hits': '0',
+30 silly get     'x-timer': 'S1466675992.137218,VS0,VE250',
+30 silly get     vary: 'Accept-Encoding' } ]
+31 error owner mutate Error getting package data for react-native-android-exoplayer
+32 verbose stack Error: Registry returned 404 for GET on https://registry.npmjs.org/react-native-android-exoplayer
+32 verbose stack     at makeError (C:\Users\phuongtq\AppData\Roaming\npm\node_modules\npm\node_modules\npm-registry-client\lib\request.js:264:12)
+32 verbose stack     at CachingRegistryClient.<anonymous> (C:\Users\phuongtq\AppData\Roaming\npm\node_modules\npm\node_modules\npm-registry-client\lib\request.js:242:14)
+32 verbose stack     at Request._callback (C:\Users\phuongtq\AppData\Roaming\npm\node_modules\npm\node_modules\npm-registry-client\lib\request.js:172:14)
+32 verbose stack     at Request.self.callback (C:\Users\phuongtq\AppData\Roaming\npm\node_modules\npm\node_modules\request\request.js:198:22)
+32 verbose stack     at emitTwo (events.js:87:13)
+32 verbose stack     at Request.emit (events.js:172:7)
+32 verbose stack     at Request.<anonymous> (C:\Users\phuongtq\AppData\Roaming\npm\node_modules\npm\node_modules\request\request.js:1063:14)
+32 verbose stack     at emitOne (events.js:82:20)
+32 verbose stack     at Request.emit (events.js:169:7)
+32 verbose stack     at IncomingMessage.<anonymous> (C:\Users\phuongtq\AppData\Roaming\npm\node_modules\npm\node_modules\request\request.js:1009:12)
+33 verbose statusCode 404
+34 verbose pkgid react-native-android-exoplayer
+35 verbose cwd D:\Code\RNProj\MODULES\react-native-android-exoplayer
+36 error Windows_NT 6.1.7601
+37 error argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Users\\phuongtq\\AppData\\Roaming\\npm\\node_modules\\npm\\bin\\npm-cli.js" "owner" "add" "tranphuong.080@gmail.com"
+38 error node v5.0.0
+39 error npm  v3.3.4
+40 error code E404
+41 error 404 Registry returned 404 for GET on https://registry.npmjs.org/react-native-android-exoplayer
+41 error 404
+41 error 404 'react-native-android-exoplayer' is not in the npm registry.
+41 error 404 You should bug the author to publish it (or use the name yourself!)
+41 error 404
+41 error 404 Note that you can also install from a
+41 error 404 tarball, folder, http url, or git url.
+42 verbose exit [ 1, true ]

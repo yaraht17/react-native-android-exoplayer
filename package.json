@@ -1,0 +1,11 @@
+{
+  "name": "react-native-android-exoplayer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Phuongtq <tranphuong.080@gmail.com> (http://innerpeace.ddns.net)",
+  "license": "ISC"
+}
