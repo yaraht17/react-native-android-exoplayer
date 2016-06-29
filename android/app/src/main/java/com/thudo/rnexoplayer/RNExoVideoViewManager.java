@@ -19,6 +19,7 @@ public class RNExoVideoViewManager extends SimpleViewManager<RNExoVideoView> {
 
     public static final String PROP_SRC = "src";
     public static final String PROP_SRC_URI = "uri";
+    public static final String PROP_SRC_RUNONLOAD = "runOnLoad";
     public static final String PROP_SRC_TYPE = "type";
     public static final String PROP_SRC_IS_NETWORK = "isNetwork";
     public static final String PROP_RESIZE_MODE = "resizeMode";
@@ -68,9 +69,7 @@ public class RNExoVideoViewManager extends SimpleViewManager<RNExoVideoView> {
     @ReactProp(name = PROP_SRC)
     public void setSrc(final RNExoVideoView videoView, @Nullable ReadableMap src) {
         videoView.setSrc(
-                src.getString(PROP_SRC_URI),
-                src.getString(PROP_SRC_TYPE),
-                src.getBoolean(PROP_SRC_IS_NETWORK)
+                src.getString(PROP_SRC_URI),src.getBoolean(PROP_SRC_RUNONLOAD)
         );
     }
 
@@ -79,15 +78,18 @@ public class RNExoVideoViewManager extends SimpleViewManager<RNExoVideoView> {
         videoView.setResizeModeModifier(ScalableType.values()[Integer.parseInt(resizeModeOrdinalString)]);
     }
 
+
+
+
 //    @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
 //    public void setRepeat(final RNExoVideoView videoView, final boolean repeat) {
 //        videoView.setRepeatModifier(repeat);
 //    }
 
-    @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
-    public void setPaused(final RNExoVideoView videoView, final boolean paused) {
-        videoView.setPausedModifier(paused);
-    }
+//    @ReactProp(name = PROP_PAUSED, defaultBoolean = false)
+//    public void setPaused(final RNExoVideoView videoView, final boolean paused) {
+//        videoView.setPausedModifier(paused);
+//    }
 
 //    @ReactProp(name = PROP_MUTED, defaultBoolean = false)
 //    public void setMuted(final RNExoVideoView videoView, final boolean muted) {
@@ -104,8 +106,8 @@ public class RNExoVideoViewManager extends SimpleViewManager<RNExoVideoView> {
         videoView.seekTo(Math.round(seek * 1000.0f));
     }
 
-    @ReactProp(name = PROP_RATE)
-    public void setRate(final RNExoVideoView videoView, final float rate) {
-        videoView.setRateModifier(rate);
-    }
+//    @ReactProp(name = PROP_RATE)
+//    public void setRate(final RNExoVideoView videoView, final float rate) {
+//        videoView.setRateModifier(rate);
+//    }
 }

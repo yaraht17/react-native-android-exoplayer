@@ -5,7 +5,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.util.Log;
 import android.view.WindowManager;
 
 import com.facebook.react.bridge.Arguments;
@@ -110,12 +109,14 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
     private boolean mMuted = false;
     private float mVolume = 1.0f;
     private float mRate = 1.0f;
+    private ScalableType mResizeMode = ScalableType.CENTER;
 
     private boolean mMediaPlayerValid = false; // True if mMediaPlayer is in prepared, started, or paused state.
     private long mVideoDuration = 0;
     private long mVideoBufferedDuration = 0;
 
     private String mSrcUriString = null;
+    private boolean mRunOnLoad = true;
     private String mSrcType = "mp4";
     private boolean mSrcIsNetwork = false;
 
@@ -124,7 +125,7 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
         mThemedReactContext = themedReactContext;
         mActivity = activity;
         mEventEmitter = themedReactContext.getJSModule(RCTEventEmitter.class);
-
+        setListener(this);
         mProgressUpdateRunnable = new Runnable() {
             int count = 0;
             @Override
@@ -142,7 +143,7 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
                         try {
                             foreground = new ForegroundCheckTask().execute(mThemedReactContext).get();
                         } catch (Exception ex) {
-                            Log.e("ReactVideoView", ex.getMessage());
+                            FullLog.e( ex.getMessage());
                         }
                         //TODO : need improve
                         //                    Log.d("ReactVideoView","foreground "+ foreground);
@@ -166,12 +167,11 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
         mProgressUpdateHandler.post(mProgressUpdateRunnable);
     }
 
-    public void setSrc(String src) {
-        Log.d("setSrc", "setSrc: " + src);
+    public void setSrc(String src,boolean runOnLoad) {
+        FullLog.d("setSrc: " + src);
 
         mSrcUriString = src;
-
-        Log.d("setSrc", "setSrc:setVideoPath ");
+        mRunOnLoad = runOnLoad;
         mMediaPlayerValid = false;
         mVideoDuration = -1;
         mVideoBufferedDuration = 0;
@@ -181,12 +181,22 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
         WritableMap event = Arguments.createMap();
         event.putMap(RNExoVideoViewManager.PROP_SRC, srcRet);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD_START.toString(), event);
-
+        setRunOnLoad(runOnLoad);
         setVideoPath(src);
 
 //        setMediaController(new MediaController(mThemedReactContext));
         requestFocus();
 
+    }
+
+    public void setResizeModeModifier(final ScalableType resizeMode) {
+        FullLog.d("setResizeModeModifier: " + resizeMode);
+        mResizeMode = resizeMode;
+
+        if (mMediaPlayerValid) {
+            setScalableType(resizeMode);
+            invalidate();
+        }
     }
 
     @Override
@@ -204,6 +214,7 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
 
     @Override
     public void onPreparedListener() {
+        FullLog.d("onPreparedListener");
         mMediaPlayerValid = true;
         mVideoDuration = mMediaPlayer.getDuration();
 
@@ -222,14 +233,15 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
 
         _activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 //        applyModifiers();
-//        setResizeModeModifier(mResizeMode);
-        class StartVideo implements Runnable {
-            @Override
-            public void run() {
-                start();
-            }
-        }
-        new Thread(new StartVideo()).start();
+        setResizeModeModifier(mResizeMode);
+
+//        class StartVideo implements Runnable {
+//            @Override
+//            public void run() {
+//                start();
+//            }
+//        }
+//        new Thread(new StartVideo()).start();
     }
 
     @Override
@@ -255,24 +267,26 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
 
 
 
-        class Release implements Runnable {
-            RNExoVideoView mRNExoVideoView;
-            Release(RNExoVideoView reactVideoView){mRNExoVideoView = reactVideoView;}
-            @Override
-            public void run() {
+//        class Release implements Runnable {
+//            RNExoVideoView mRNExoVideoView;
+//            Release(RNExoVideoView reactVideoView){mRNExoVideoView = reactVideoView;}
+//            @Override
+//            public void run() {
                 try {
-                    mMediaPlayer.stop();
-                    mMediaPlayer.release();
-                    mMediaPlayer = null;
+                    if (mMediaPlayer != null) {
+                        mMediaPlayer.stop();
+                        mMediaPlayer.release();
+                        mMediaPlayer = null;
+                    }
                 }
                 catch(Exception ex){
-                    Log.e("ReactVideoView","onDetachedFromWindow err");
+                    FullLog.e(ex.toString());
                 }
 
-            }
-        }
-
-        new Thread(new Release(this)).start();
+//            }
+//        }
+//
+//        new Thread(new Release(this)).start();
 
         super.onDetachedFromWindow();
     }
@@ -281,10 +295,10 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
     protected void onAttachedToWindow() {
         try {
             super.onAttachedToWindow();
-            setSrc(mSrcUriString);
+            setSrc(mSrcUriString,mRunOnLoad);
         }
         catch(Exception ex){
-            Log.e("ReactVideoView","onAttachedToWindow err");
+            FullLog.e(ex.toString());
         }
 
     }

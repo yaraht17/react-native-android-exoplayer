@@ -20,11 +20,14 @@ package com.thudo.rnexoplayer;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 import android.view.TextureView;
@@ -78,7 +81,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 //        void onBufferingUpdateListener();
     }
 
-    public static final String TAG = "ScalableVitamioVideo";
+    public static final String TAG = "ScalableExoVideoView";
 
     Context mContext;
     protected Activity _activity;
@@ -93,13 +96,16 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 //    private int mTargetState = STATE_IDLE;
 
     private Uri mUri;
-    private int contentType;
+    private int mContentType;
     private String contentId;
     private String provider;
 
     protected long playerPosition;
 
     private Listener mListener;
+    private boolean mRunOnLoad = true;
+    protected ScalableType mScalableType = ScalableType.NONE;
+
 
     public static final int VIDEO_LAYOUT_ORIGIN = 0;
     public static final int VIDEO_LAYOUT_SCALE = 1;
@@ -107,19 +113,39 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
     public static final int VIDEO_LAYOUT_ZOOM = 3;
     public static final int VIDEO_LAYOUT_FIT_PARENT = 4;
 
+    /////////////////////
+    private long mDuration;
+
+    private float mAspectRatio = 0;
+    private int mVideoLayout = VIDEO_LAYOUT_SCALE;
+    //    private SurfaceHolder mSurfaceHolder = null;
+    private Surface mSurface = null;
+    private int mVideoWidth;
+    private int mVideoHeight;
+    private float mVideoAspectRatio;
+
+    private boolean mHardwareDecoder = false;
+    private int mSurfaceWidth;
+    private int mSurfaceHeight;
+    private float mVolumeLeft;
+    private float mVolumeRight;
+    private boolean mMuted;
+    private MediaController mMediaController;
+    private View mMediaBufferingIndicator;
+
+    private int mCurrentBufferPercentage;
+    private long mSeekWhenPrepared; // recording the seek position while preparing
+    private Map<String, String> mHeaders;
+    private int mBufSize;
+
     public ScalableExoVideoView(Context context,Activity activity) {
-        super(context);
-        mContext = context;
-        _activity = activity;
-        initVideoView(context);
+
+        this(context, null,activity);
     }
 
     public ScalableExoVideoView(Context context, AttributeSet attrs,Activity activity) {
 
         this(context, attrs, 0,activity);
-        mContext = context;
-        _activity = activity;
-        initVideoView(context);
     }
 
     public ScalableExoVideoView(Context context, AttributeSet attrs, int defStyle,Activity activity) {
@@ -127,7 +153,21 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         super(context, attrs, defStyle);
         mContext = context;
         _activity = activity;
+
         initVideoView(context);
+
+        if (attrs == null) {
+            return;
+        }
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.scaleStyle, 0, 0);
+        if (a == null) {
+            return;
+        }
+
+        int scaleType = a.getInt(R.styleable.scaleStyle_scalableType, ScalableType.NONE.ordinal());
+        a.recycle();
+        mScalableType = ScalableType.values()[scaleType];
     }
 
 
@@ -136,25 +176,25 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         for (Id3Frame id3Frame : id3Frames) {
             if (id3Frame instanceof TxxxFrame) {
                 TxxxFrame txxxFrame = (TxxxFrame) id3Frame;
-                Log.i("ID3 TimedMetadata %s: description=%s, value=%s", txxxFrame.id,
+                FullLog.i("ID3 TimedMetadata %s: description=%s, value=%s", txxxFrame.id,
                         txxxFrame.description, txxxFrame.value);
             } else if (id3Frame instanceof PrivFrame) {
                 PrivFrame privFrame = (PrivFrame) id3Frame;
-                Log.i("ID3 TimedMetadata %s: owner=%s", privFrame.id, privFrame.owner);
+                FullLog.i("ID3 TimedMetadata %s: owner=%s", privFrame.id, privFrame.owner);
             } else if (id3Frame instanceof GeobFrame) {
                 GeobFrame geobFrame = (GeobFrame) id3Frame;
-                Log.i("ID3 TimedMetadata %s: mimeType=%s, filename=%s, description=%s",
+                FullLog.i("ID3 TimedMetadata %s: mimeType=%s, filename=%s, description=%s",
                         geobFrame.id, geobFrame.mimeType, geobFrame.filename, geobFrame.description);
             } else if (id3Frame instanceof ApicFrame) {
                 ApicFrame apicFrame = (ApicFrame) id3Frame;
-                Log.i("ID3 TimedMetadata %s: mimeType=%s, description=%s",
+                FullLog.i("ID3 TimedMetadata %s: mimeType=%s, description=%s",
                         apicFrame.id, apicFrame.mimeType, apicFrame.description);
             } else if (id3Frame instanceof TextInformationFrame) {
                 TextInformationFrame textInformationFrame = (TextInformationFrame) id3Frame;
-                Log.i("ID3 TimedMetadata %s: description=%s", textInformationFrame.id,
+                FullLog.i("ID3 TimedMetadata %s: description=%s", textInformationFrame.id,
                         textInformationFrame.description);
             } else {
-                Log.i("ID3 TimedMetadata %s", id3Frame.id);
+                FullLog.i("ID3 TimedMetadata %s", id3Frame.id);
             }
         }
     }
@@ -168,24 +208,32 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         switch(playbackState) {
             case ExoPlayer.STATE_BUFFERING:
                 mCurrentState=DemoPlayer.STATE_BUFFERING;
+                text += "buffering";
                 break;
             case ExoPlayer.STATE_ENDED:
                 mCurrentState=DemoPlayer.STATE_ENDED;
+                text += "ended";
                 onCompletion();
                 break;
             case ExoPlayer.STATE_IDLE:
                 mCurrentState=DemoPlayer.STATE_IDLE;
+                text += "idle";
                 break;
             case ExoPlayer.STATE_PREPARING:
                 mCurrentState=DemoPlayer.STATE_PREPARING;
+                text += "preparing";
                 break;
             case ExoPlayer.STATE_READY:
                 mCurrentState=DemoPlayer.STATE_READY;
+                text += "ready";
                 onPrepared();
                 break;
             default:
+                text += "unknown" + playbackState;
                 break;
         }
+
+        FullLog.d(text);
 //        playerStateTextView.setText(text);
 //        updateButtonVisibilities();
     }
@@ -222,11 +270,15 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         if (errorString != null) {
             Toast.makeText(mContext, errorString, Toast.LENGTH_LONG).show();
         }
+        FullLog.e((errorString != null) ? errorString : Log.getStackTraceString(e));
         playerNeedsPrepare = true;
 //        updateButtonVisibilities();
 //        showControls();
 
-        mListener.onErrorListener((errorString != null) ? errorString : e.toString());
+        if (mListener != null){
+            mListener.onErrorListener((errorString != null) ? errorString : e.toString());
+        }
+
     }
 
     @Override
@@ -253,13 +305,9 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 
     private void releasePlayer() {
         if (mMediaPlayer != null) {
-//            debugViewHelper.stop();
-//            debugViewHelper = null;
             playerPosition = mMediaPlayer.getCurrentPosition();
             mMediaPlayer.release();
             mMediaPlayer = null;
-//            eventLogger.endSession();
-//            eventLogger = null;
         }
     }
 
@@ -269,21 +317,16 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
             mMediaPlayer.addListener(this);
             mMediaPlayer.setCaptionListener(this);
             mMediaPlayer.setMetadataListener(this);
-            mMediaPlayer.seekTo(playerPosition);
+//            mMediaPlayer.seekTo(playerPosition);
             playerNeedsPrepare = true;
 //            mediaController.setMediaPlayer(player.getPlayerControl());
 //            mediaController.setEnabled(true);
-//            eventLogger = new EventLogger();
-//            eventLogger.startSession();
-//            player.addListener(eventLogger);
-//            player.setInfoListener(eventLogger);
-//            player.setInternalErrorListener(eventLogger);
-//            debugViewHelper = new DebugTextViewHelper(player, debugTextView);
-//            debugViewHelper.start();
         }
+
         if (playerNeedsPrepare) {
             mMediaPlayer.prepare();
             playerNeedsPrepare = false;
+
 //            updateButtonVisibilities();
         }
         mMediaPlayer.setSurface(mSurface);
@@ -292,7 +335,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
     }
     private DemoPlayer.RendererBuilder getRendererBuilder() {
         String userAgent = Util.getUserAgent(_activity, "ExoPlayerDemo");
-        switch (contentType) {
+        switch (mContentType) {
             case Util.TYPE_SS:
                 return new SmoothStreamingRendererBuilder(_activity, userAgent, mUri.toString(),
                         new SmoothStreamingTestMediaDrmCallback());
@@ -304,7 +347,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
             case Util.TYPE_OTHER:
                 return new ExtractorRendererBuilder(_activity, userAgent, mUri);
             default:
-                throw new IllegalStateException("Unsupported type: " + contentType);
+                throw new IllegalStateException("Unsupported type: " + mContentType);
         }
     }
 
@@ -312,7 +355,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
     public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees,
                                    float pixelWidthAspectRatio) {
 //        shutterView.setVisibility(View.GONE);
-        Log.d("onVideoSizeChanged: (%dx%d)", width, height);
+        FullLog.d("onVideoSizeChanged: (%dx%d)", width, height);
         mVideoWidth = width;
         mVideoHeight = height;
         mVideoAspectRatio = ( height == 0 ? 1 : (width * pixelWidthAspectRatio) / height);
@@ -327,26 +370,22 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
     ////////////////////
 
     public void onPrepared() {
-        Log.d("onPrepared");
+        FullLog.d("onPrepared");
 
         // Get the capabilities of the player for this stream
         //TODO mCanPause
-
-        mListener.onPreparedListener();
+        if (mListener != null) {
+            mListener.onPreparedListener();
+        }
 
         if (mMediaController != null)
             mMediaController.setEnabled(true);
-//        mVideoWidth = mp.getVideoWidth();
-//        mVideoHeight = mp.getVideoHeight();
-//        mVideoAspectRatio = mp.getVideoAspectRatio();
 
         long seekToPosition = mSeekWhenPrepared;
         if (seekToPosition != 0)
             seekTo(seekToPosition);
 
-//        if (mVideoWidth != 0 && mVideoHeight != 0) {
-//            setVideoLayout(mVideoLayout, mAspectRatio);
-//            if (mSurfaceWidth == mVideoWidth && mSurfaceHeight == mVideoHeight) {
+
 //                if (mTargetState == STATE_PLAYING) {
 //                    start();
 //                    if (mMediaController != null)
@@ -355,11 +394,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 //                    if (mMediaController != null)
 //                        mMediaController.show(0);
 //                }
-//            }
-//        } else if (mTargetState == STATE_PLAYING) {
-            start();
-//        }
-    };
+    }
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
@@ -367,33 +402,35 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         Surface surface = new Surface(surfaceTexture);
         mSurface = surface;
 
-        class SetSurface implements Runnable {
-            Surface mSurface;
-            SetSurface(Surface surface){mSurface = surface;}
-            @Override
-            public void run() {
+        FullLog.d("onSurfaceTextureAvailable");
+
+//        class SetSurface implements Runnable {
+//            Surface mSurface;
+//            SetSurface(Surface surface){mSurface = surface;}
+//            @Override
+//            public void run() {
                 try {
                     if (mMediaPlayer != null) {
                         mMediaPlayer.setSurface(mSurface);
                         resume();
                     } else {
-                        openVideo();
+                        openVideo(mRunOnLoad);
                     }
                 }
                 catch(Exception ex){
-                    android.util.Log.e("ReactVideoView","onDetachedFromWindow err");
+                    FullLog.e(ex.toString());
                 }
-            }
-        }
-
-        new Thread(new SetSurface(surface)).start();
+//            }
+//        }
+//
+//        new Thread(new SetSurface(surface)).start();
 
     }
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
         mSurfaceWidth = width;
         mSurfaceHeight = height;
-//        boolean isValidState = (mTargetState == STATE_PLAYING);
+        FullLog.d("onSurfaceTextureSizeChanged");
         boolean hasValidSize = (mVideoWidth == width && mVideoHeight == height);
         if (mMediaPlayer != null && hasValidSize) {
             if (mSeekWhenPrepared != 0)
@@ -410,6 +447,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         mSurface = null;
+        FullLog.d("onSurfaceTextureDestroyed");
         if (mMediaController != null) mMediaController.hide();
         release(true);
         return false;
@@ -420,6 +458,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
     }
     @Override
     protected void onDetachedFromWindow() {
+        FullLog.d("onDetachedFromWindow");
         super.onDetachedFromWindow();
 //        if (mMediaPlayer == null) {
 //            return;
@@ -504,6 +543,11 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 
 
     ///////////////////
+    public void setRunOnLoad(boolean runOnLoad) {
+        mRunOnLoad = runOnLoad;
+    }
+
+
     public void setVideoPath(String path) {
         setVideoURI(Uri.parse(path));
     }
@@ -516,7 +560,8 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         mUri = uri;
         mHeaders = headers;
         mSeekWhenPrepared = 0;
-        openVideo();
+        mContentType = inferContentType(uri,"");
+        openVideo(mRunOnLoad);
         requestLayout();
         invalidate();
     }
@@ -531,49 +576,32 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         }
     }
 
-    private void openVideo() {
-        android.util.Log.d(TAG, "openVideo: "+mUri+":"+mSurface+":");
+    private void openVideo(boolean runOnStart) {
+        FullLog.d("openVideo: "+mUri+":"+mSurface+":");
         if (mUri == null || mSurface == null )
             return;
 
-        preparePlayer(true);
+        try {
+            preparePlayer(runOnStart);
+        }
+        catch (Exception ex){
+            FullLog.e(ex.toString());
+        }
+
         _activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     }
 
 
-    /////////////////////
-    private long mDuration;
-
-    private float mAspectRatio = 0;
-    private int mVideoLayout = VIDEO_LAYOUT_SCALE;
-//    private SurfaceHolder mSurfaceHolder = null;
-    private Surface mSurface = null;
-    private int mVideoWidth;
-    private int mVideoHeight;
-    private float mVideoAspectRatio;
-
-    private boolean mHardwareDecoder = false;
-    private int mSurfaceWidth;
-    private int mSurfaceHeight;
-    private float mVolumeLeft;
-    private float mVolumeRight;
-    private boolean mMuted;
-    private MediaController mMediaController;
-    private View mMediaBufferingIndicator;
-
-    private int mCurrentBufferPercentage;
-    private long mSeekWhenPrepared; // recording the seek position while preparing
-    private Map<String, String> mHeaders;
-    private int mBufSize;
-
     public void onCompletion() {
-        Log.d("onCompletion");
+        FullLog.d("onCompletion");
 //            mCurrentState = STATE_PLAYBACK_COMPLETED;
 //            mTargetState = STATE_PLAYBACK_COMPLETED;
         if (mMediaController != null)
             mMediaController.hide();
-        mListener.onCompletionListener();
+        if (mListener != null) {
+            mListener.onCompletionListener();
+        }
 
     }
 
@@ -645,9 +673,23 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         }
         setLayoutParams(lp);
 //        getSurfaceTexture().setFixedSize(mSurfaceWidth, mSurfaceHeight);
-        Log.d("VIDEO: %dx%dx%f, Surface: %dx%d, LP: %dx%d, Window: %dx%dx%f", mVideoWidth, mVideoHeight, mVideoAspectRatio, mSurfaceWidth, mSurfaceHeight, lp.width, lp.height, windowWidth, windowHeight, windowRatio);
+        FullLog.d("VIDEO: %dx%dx%f, Surface: %dx%d, LP: %dx%d, Window: %dx%dx%f", mVideoWidth, mVideoHeight, mVideoAspectRatio, mSurfaceWidth, mSurfaceHeight, lp.width, lp.height, windowWidth, windowHeight, windowRatio);
         mVideoLayout = layout;
         mAspectRatio = aspectRatio;
+    }
+
+    private void scaleVideoSize(int videoWidth, int videoHeight) {
+        if (videoWidth == 0 || videoHeight == 0) {
+            return;
+        }
+
+        Size viewSize = new Size(getWidth(), getHeight());
+        Size videoSize = new Size(videoWidth, videoHeight);
+        ScaleManager scaleManager = new ScaleManager(viewSize, videoSize);
+        Matrix matrix = scaleManager.getScaleMatrix(mScalableType);
+        if (matrix != null) {
+            setTransform(matrix);
+        }
     }
 
     @SuppressWarnings("deprecation")
@@ -655,20 +697,13 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         mContext = ctx;
         mVideoWidth = 0;
         mVideoHeight = 0;
-        android.util.Log.d(TAG, "initVideoView: init");
+        FullLog.d("initVideoView: init");
 
         setSurfaceTextureListener(this);
-//        getSurfaceTexture().setFormat(PixelFormat.RGBA_8888); // PixelFormat.RGB_565
-//        getSurfaceTexture().addCallback(mSHCallback);
-        // this value only use Hardware decoder before Android 2.3
-//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB && mHardwareDecoder) {
-//            getSurfaceTexture().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-//        }
         setFocusable(true);
         setFocusableInTouchMode(true);
         requestFocus();
-//        mCurrentState = STATE_IDLE;
-//        mTargetState = STATE_IDLE;
+        mCurrentState = DemoPlayer.STATE_IDLE;
         if (ctx instanceof Activity)
             ((Activity) ctx).setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
@@ -709,11 +744,8 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 
 
     private void release(boolean cleartargetstate) {
-
         releasePlayer();
-
         _activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
     }
 
 
@@ -727,43 +759,19 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 
     public void start() {
         _activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        openVideo();
-//        if (isInPlaybackState()) {
-//            mMediaPlayer.start();
-//            mCurrentState = STATE_PLAYING;
-//        }
-//        mTargetState = STATE_PLAYING;
+        openVideo(true);
     }
 
     public void pause() {
         if (isInPlaybackState()) {
-//            if (mMediaPlayer.isPlaying()) {
                 mMediaPlayer.stop();
-//                mCurrentState = STATE_PAUSED;
-//            }
         }
         _activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-//        mTargetState = STATE_PAUSED;
-    }
-
-    public void suspend() {
-        if (isInPlaybackState()) {
-            release(false);
-//            mCurrentState = STATE_SUSPEND_UNSUPPORTED;
-            Log.d("Unable to suspend video. Release MediaPlayer.");
-        }
     }
 
     public void resume() {
         _activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-//        if (mSurface == null && mCurrentState == STATE_SUSPEND) {
-//            mTargetState = STATE_RESUME;
-//        } else if (mCurrentState == STATE_SUSPEND_UNSUPPORTED) {
-            openVideo();
-//        }
-//        else{
-//
-//        }
+        openVideo(true);
     }
 
     public long getDuration() {
@@ -851,6 +859,11 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 //        if (mMediaPlayer != null)
 //            mMediaPlayer.setVideoQuality(quality);
 //    }
+
+    public void setScalableType(ScalableType scalableType) {
+        mScalableType = scalableType;
+        scaleVideoSize(getVideoWidth(), getVideoHeight());
+    }
 
     public void setBufferSize(int bufSize) {
         mBufSize = bufSize;
