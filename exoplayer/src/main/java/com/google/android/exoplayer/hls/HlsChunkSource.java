@@ -15,7 +15,12 @@
  */
 package com.google.android.exoplayer.hls;
 
-import com.google.android.exoplayer.BehindLiveWindowException;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.SystemClock;
+import android.text.TextUtils;
+import android.util.Log;
+
 import com.google.android.exoplayer.C;
 import com.google.android.exoplayer.MediaFormat;
 import com.google.android.exoplayer.chunk.Chunk;
@@ -35,12 +40,6 @@ import com.google.android.exoplayer.util.Assertions;
 import com.google.android.exoplayer.util.MimeTypes;
 import com.google.android.exoplayer.util.UriUtil;
 import com.google.android.exoplayer.util.Util;
-
-import android.net.Uri;
-import android.os.Handler;
-import android.os.SystemClock;
-import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -458,8 +457,14 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
         chunkMediaSequence = switchingVariantSpliced
             ? previousTsChunk.chunkIndex : previousTsChunk.chunkIndex + 1;
         if (chunkMediaSequence < mediaPlaylist.mediaSequence) {
-          fatalError = new BehindLiveWindowException();
-          return;
+
+//          if (allowSkipAhead) {
+            chunkMediaSequence = getLiveStartChunkMediaSequence(nextVariantIndex);
+//            liveDiscontinuity = true;
+//          } else {
+//            fatalError = new BehindLiveWindowException();
+//            return;
+//          }
         }
       }
     } else {
