@@ -8,9 +8,11 @@ import android.os.Handler;
 import android.view.WindowManager;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.thudo.rnexoplayer.player.DemoPlayer;
 
 import java.util.List;
 
@@ -92,6 +94,15 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
     public static final String EVENT_PROP_CURRENT_TIME = "currentTime";
     public static final String EVENT_PROP_BUFFER_PERCENT = "bufferPercent";
     public static final String EVENT_PROP_SEEK_TIME = "seekTime";
+
+    public static final String EVENT_PROP_VIDEO_TRACKS = "videoTracks";
+    public static final String EVENT_PROP_AUDIO_TRACKS = "audioTracks";
+    public static final String EVENT_PROP_TEXT_TRACKS = "textTracks";
+
+    public static final String EVENT_PROP_SELECTED_VIDEO_TRACKS = "selectedVideoTracks";
+    public static final String EVENT_PROP_SELECTED_AUDIO_TRACKS = "selectedAudioTracks";
+    public static final String EVENT_PROP_SELECTED_TEXT_TRACKS = "selectedTextTracks";
+
 
     public static final String EVENT_PROP_ERROR = "error";
     public static final String EVENT_PROP_WHAT = "what";
@@ -199,6 +210,28 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
         }
     }
 
+    public void setPausedModifier(final boolean pause) {
+        FullLog.d("setPausedModifier: " + pause);
+        mPaused = pause;
+
+        if (mMediaPlayerValid) {
+            if (pause) {
+                pause();
+            }
+            else{
+                start();
+            }
+        }
+    }
+
+    public void setSelectedTrack(final int trackType,final int index){
+        mMediaPlayer.setSelectedTrack(trackType,index);
+    }
+
+    public int getNumberTrack(final int trackType){
+        return mMediaPlayer.getSelectedTrack(trackType);
+    }
+
     @Override
     public void seekTo(long msec) {
 
@@ -229,6 +262,36 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
         event.putBoolean(EVENT_PROP_FAST_FORWARD, true);
         event.putBoolean(EVENT_PROP_STEP_BACKWARD, true);
         event.putBoolean(EVENT_PROP_STEP_FORWARD, true);
+
+        event.putInt(EVENT_PROP_SELECTED_VIDEO_TRACKS, getSelectedTrack(DemoPlayer.TYPE_VIDEO));
+
+        WritableArray videoTracks = Arguments.createArray();
+        String[] trackNameArray= getTrackNameArray(DemoPlayer.TYPE_VIDEO);
+        for (String trackName :
+                trackNameArray) {
+            videoTracks.pushString(trackName);
+        }
+        event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTracks);
+
+        WritableArray audioTracks = Arguments.createArray();
+        trackNameArray= getTrackNameArray(DemoPlayer.TYPE_AUDIO);
+        for (String trackName :
+                trackNameArray) {
+            audioTracks.pushString(trackName);
+        }
+        event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTracks);
+
+        WritableArray textTracks = Arguments.createArray();
+        trackNameArray= getTrackNameArray(DemoPlayer.TYPE_TEXT);
+        for (String trackName :
+                trackNameArray) {
+            textTracks.pushString(trackName);
+        }
+        event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks);
+
+
+
+
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD.toString(), event);
 
         _activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

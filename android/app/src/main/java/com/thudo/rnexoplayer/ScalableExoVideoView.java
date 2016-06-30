@@ -56,6 +56,7 @@ import com.google.android.exoplayer.metadata.id3.TxxxFrame;
 import com.google.android.exoplayer.text.CaptionStyleCompat;
 import com.google.android.exoplayer.text.Cue;
 import com.google.android.exoplayer.text.SubtitleLayout;
+import com.google.android.exoplayer.util.MimeTypes;
 import com.google.android.exoplayer.util.Util;
 import com.thudo.rnexoplayer.player.DashRendererBuilder;
 import com.thudo.rnexoplayer.player.DemoPlayer;
@@ -759,12 +760,13 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 
     public void start() {
         _activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        openVideo(true);
+        mMediaPlayer.setPlayWhenReady(true);
+//        openVideo(true);
     }
 
     public void pause() {
         if (isInPlaybackState()) {
-                mMediaPlayer.stop();
+                mMediaPlayer.setPlayWhenReady(false);
         }
         _activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -896,6 +898,52 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 //            return mMediaPlayer.findTrackFromTrackInfo(TrackInfo.MEDIA_TRACK_TYPE_AUDIO, mMediaPlayer.getTrackInfo(encoding));
 //        return null;
 //    }
+
+    public int getSelectedTrack(final int trackType){
+        return mMediaPlayer.getSelectedTrack(trackType);
+    }
+
+    public void setTrack(final int trackType,final int index){
+        mMediaPlayer.setSelectedTrack(trackType,index);
+    }
+
+    public String[] getTrackNameArray(final int trackType){
+        String[] trackNameArray = null;
+        if (mMediaPlayer == null) {
+            return trackNameArray;
+        }
+        int trackCount = mMediaPlayer.getTrackCount(trackType);
+        if (trackCount == 0) {
+            return trackNameArray;
+        }
+
+        trackNameArray = new String[trackCount];
+
+        for (int i = 0; i < trackCount; i++) {
+            trackNameArray[i] = buildTrackName(mMediaPlayer.getTrackFormat(trackType, i));
+        }
+
+        return trackNameArray;
+    }
+
+    private static String buildTrackName(MediaFormat format) {
+        if (format.adaptive) {
+            return "auto";
+        }
+        String trackName;
+        if (MimeTypes.isVideo(format.mimeType)) {
+            trackName = joinWithSeparator(joinWithSeparator(buildResolutionString(format),
+                    buildBitrateString(format)), buildTrackIdString(format));
+        } else if (MimeTypes.isAudio(format.mimeType)) {
+            trackName = joinWithSeparator(joinWithSeparator(joinWithSeparator(buildLanguageString(format),
+                    buildAudioPropertyString(format)), buildBitrateString(format)),
+                    buildTrackIdString(format));
+        } else {
+            trackName = joinWithSeparator(joinWithSeparator(buildLanguageString(format),
+                    buildBitrateString(format)), buildTrackIdString(format));
+        }
+        return trackName.length() == 0 ? "unknown" : trackName;
+    }
 
     protected boolean isInPlaybackState() {
         return (mMediaPlayer != null && mCurrentState != DemoPlayer.STATE_IDLE && mCurrentState != DemoPlayer.STATE_PREPARING);
