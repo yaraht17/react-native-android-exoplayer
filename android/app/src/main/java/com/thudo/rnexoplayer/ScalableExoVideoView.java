@@ -306,9 +306,15 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 
     private void releasePlayer() {
         if (mMediaPlayer != null) {
-            playerPosition = mMediaPlayer.getCurrentPosition();
-            mMediaPlayer.release();
-            mMediaPlayer = null;
+            try {
+                playerPosition = mMediaPlayer.getCurrentPosition();
+                mMediaPlayer.release();
+                mMediaPlayer = null;
+            }
+            catch(Exception ex){
+                Log.e("ReactVideoView","onDetachedFromWindow err");
+            }
+
         }
     }
 
@@ -405,26 +411,17 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 
         FullLog.d("onSurfaceTextureAvailable");
 
-//        class SetSurface implements Runnable {
-//            Surface mSurface;
-//            SetSurface(Surface surface){mSurface = surface;}
-//            @Override
-//            public void run() {
-                try {
-                    if (mMediaPlayer != null) {
-                        mMediaPlayer.setSurface(mSurface);
-                        resume();
-                    } else {
-                        openVideo(mRunOnLoad);
-                    }
-                }
-                catch(Exception ex){
-                    FullLog.e(ex.toString());
-                }
-//            }
-//        }
-//
-//        new Thread(new SetSurface(surface)).start();
+        try {
+            if (mMediaPlayer != null) {
+                mMediaPlayer.setSurface(mSurface);
+                resume();
+            } else {
+                openVideo(mRunOnLoad);
+            }
+        }
+        catch(Exception ex){
+            FullLog.e(ex.toString());
+        }
 
     }
     @Override
@@ -450,7 +447,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         mSurface = null;
         FullLog.d("onSurfaceTextureDestroyed");
         if (mMediaController != null) mMediaController.hide();
-        release(true);
+        release();
         return false;
     }
 
@@ -461,14 +458,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
     protected void onDetachedFromWindow() {
         FullLog.d("onDetachedFromWindow");
         super.onDetachedFromWindow();
-//        if (mMediaPlayer == null) {
-//            return;
-//        }
-//
-//        if (isPlaying()) {
-//            stop();
-//        }
-        release(true);
+        release();
         mMediaPlayer = null;
     }
 
@@ -577,17 +567,25 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         }
     }
 
-    private void openVideo(boolean runOnStart) {
+    private void openVideo(final boolean runOnStart) {
         FullLog.d("openVideo: "+mUri+":"+mSurface+":");
         if (mUri == null || mSurface == null )
             return;
 
-        try {
-            preparePlayer(runOnStart);
-        }
-        catch (Exception ex){
-            FullLog.e(ex.toString());
-        }
+//        class OpenVideo implements Runnable {
+//            @Override
+//            public void run() {
+                try {
+                    preparePlayer(runOnStart);
+                }
+                catch (Exception ex){
+                    FullLog.e(ex.toString());
+                }
+//            }
+//        }
+//        new Thread(new OpenVideo()).start();
+
+
 
         _activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -744,8 +742,15 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 //    }
 
 
-    private void release(boolean cleartargetstate) {
-        releasePlayer();
+    public void release() {
+//        class Release implements Runnable {
+//            @Override
+//            public void run() {
+                releasePlayer();
+//            }
+//        }
+//        new Thread(new Release()).start();
+
         _activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -790,6 +795,12 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
     public long getCurrentPosition() {
         if (isInPlaybackState())
             return mMediaPlayer.getCurrentPosition();
+        return 0;
+    }
+
+    public long getBufferedPosition() {
+        if (isInPlaybackState())
+            return mMediaPlayer.getBufferedPosition();
         return 0;
     }
 
@@ -899,11 +910,15 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 //        return null;
 //    }
 
+    public int getNumberTrack(final int trackType){
+        return mMediaPlayer.getTrackCount(trackType);
+    }
+
     public int getSelectedTrack(final int trackType){
         return mMediaPlayer.getSelectedTrack(trackType);
     }
 
-    public void setTrack(final int trackType,final int index){
+    public void setSelectedTrack(final int trackType,final int index){
         mMediaPlayer.setSelectedTrack(trackType,index);
     }
 

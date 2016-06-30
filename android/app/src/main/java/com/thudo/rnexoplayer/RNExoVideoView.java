@@ -172,7 +172,7 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
                     event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoDuration / 1000.0); //TODO:mBufferUpdateRunnable
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
                 }
-                mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 250);
+                mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 1000);
             }
         };
         mProgressUpdateHandler.post(mProgressUpdateRunnable);
@@ -222,14 +222,6 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
                 start();
             }
         }
-    }
-
-    public void setSelectedTrack(final int trackType,final int index){
-        mMediaPlayer.setSelectedTrack(trackType,index);
-    }
-
-    public int getNumberTrack(final int trackType){
-        return mMediaPlayer.getSelectedTrack(trackType);
     }
 
     @Override
@@ -328,28 +320,7 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
         mMediaPlayerValid = false;
         _activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-
-
-//        class Release implements Runnable {
-//            RNExoVideoView mRNExoVideoView;
-//            Release(RNExoVideoView reactVideoView){mRNExoVideoView = reactVideoView;}
-//            @Override
-//            public void run() {
-                try {
-                    if (mMediaPlayer != null) {
-                        mMediaPlayer.stop();
-                        mMediaPlayer.release();
-                        mMediaPlayer = null;
-                    }
-                }
-                catch(Exception ex){
-                    FullLog.e(ex.toString());
-                }
-
-//            }
-//        }
-//
-//        new Thread(new Release(this)).start();
+        release();
 
         super.onDetachedFromWindow();
     }
