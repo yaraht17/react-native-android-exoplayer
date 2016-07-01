@@ -93,7 +93,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 
     private MediaController mediaController;
 
-    private int mCurrentState = DemoPlayer.STATE_IDLE;
+    protected int mCurrentState = DemoPlayer.STATE_IDLE;
 //    private int mTargetState = STATE_IDLE;
 
     private Uri mUri;
@@ -466,6 +466,7 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
     private static String buildResolutionString(MediaFormat format) {
         return format.width == MediaFormat.NO_VALUE || format.height == MediaFormat.NO_VALUE
                 ? "" : format.width + "x" + format.height;
+
     }
 
     private static String buildAudioPropertyString(MediaFormat format) {
@@ -947,8 +948,8 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
         }
         String trackName;
         if (MimeTypes.isVideo(format.mimeType)) {
-            trackName = joinWithSeparator(joinWithSeparator(buildResolutionString(format),
-                    buildBitrateString(format)), buildTrackIdString(format));
+            trackName = joinWithSeparator(format.height + "p",
+                    buildBitrateString(format));
         } else if (MimeTypes.isAudio(format.mimeType)) {
             trackName = joinWithSeparator(joinWithSeparator(joinWithSeparator(buildLanguageString(format),
                     buildAudioPropertyString(format)), buildBitrateString(format)),

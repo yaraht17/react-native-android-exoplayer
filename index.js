@@ -21,6 +21,7 @@ class ExoVideo extends Component {
   constructor(props, context) {
     super(props, context);
     this.seek = this.seek.bind(this);
+    this.selectVideoTrack = this.selectVideoTrack.bind(this);
     this._onLoadStart = this._onLoadStart.bind(this);
     this._onLoad = this._onLoad.bind(this);
     this._onError = this._onError.bind(this);
@@ -35,6 +36,10 @@ class ExoVideo extends Component {
 
   seek(time) {
     this.setNativeProps({ seek: parseFloat(time) });
+  }
+
+  selectVideoTrack(index) {
+    this.setNativeProps({ selectedVideoTrack: parseInt(index) });
   }
 
   _onLoadStart(event) {

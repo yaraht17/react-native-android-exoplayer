@@ -1,9 +1,6 @@
 package com.thudo.rnexoplayer;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.view.WindowManager;
 
@@ -13,8 +10,6 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.thudo.rnexoplayer.player.DemoPlayer;
-
-import java.util.List;
 
 /**
  * @author phuongtq
@@ -37,29 +32,6 @@ import java.util.List;
  * </pre>
  */
 
-class ForegroundCheckTask extends AsyncTask<Context, Void, Boolean> {
-
-    @Override
-    protected Boolean doInBackground(Context... params) {
-        final Context context = params[0].getApplicationContext();
-        return isAppOnForeground(context);
-    }
-
-    private boolean isAppOnForeground(Context context) {
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
-        if (appProcesses == null) {
-            return false;
-        }
-        final String packageName = context.getPackageName();
-        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
-            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
 
 public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoVideoView.Listener {
     public enum Events {
@@ -93,15 +65,16 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
     public static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     public static final String EVENT_PROP_CURRENT_TIME = "currentTime";
     public static final String EVENT_PROP_BUFFER_PERCENT = "bufferPercent";
+    public static final String EVENT_PROP_BUFFER_POSITION = "bufferPosition";
     public static final String EVENT_PROP_SEEK_TIME = "seekTime";
 
     public static final String EVENT_PROP_VIDEO_TRACKS = "videoTracks";
     public static final String EVENT_PROP_AUDIO_TRACKS = "audioTracks";
     public static final String EVENT_PROP_TEXT_TRACKS = "textTracks";
 
-    public static final String EVENT_PROP_SELECTED_VIDEO_TRACKS = "selectedVideoTracks";
-    public static final String EVENT_PROP_SELECTED_AUDIO_TRACKS = "selectedAudioTracks";
-    public static final String EVENT_PROP_SELECTED_TEXT_TRACKS = "selectedTextTracks";
+    public static final String EVENT_PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
+    public static final String EVENT_PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
+    public static final String EVENT_PROP_SELECTED_TEXT_TRACK = "selectedTextTracks";
 
 
     public static final String EVENT_PROP_ERROR = "error";
@@ -131,52 +104,46 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
     private String mSrcType = "mp4";
     private boolean mSrcIsNetwork = false;
 
+    private boolean mStarted = false;
+
+
     RNExoVideoView(ThemedReactContext themedReactContext ,Activity activity){
         super(themedReactContext,activity);
+        FullLog.d("RNExoVideoView");
         mThemedReactContext = themedReactContext;
         mActivity = activity;
         mEventEmitter = themedReactContext.getJSModule(RCTEventEmitter.class);
         setListener(this);
         mProgressUpdateRunnable = new Runnable() {
-            int count = 0;
             @Override
             public void run() {
                 //
-                if (!isValid()) {
-                    mProgressUpdateHandler.removeCallbacks(mProgressUpdateRunnable);
-                    return;
+//                FullLog.d("mProgressUpdateRunnable " + isValid());
+
+                if (mStarted) {
+                    if (!isValid()) {
+                        mProgressUpdateHandler.removeCallbacks(mProgressUpdateRunnable);
+                        return;
+                    }
+
+                    if (mMediaPlayerValid && (mCurrentState!=DemoPlayer.STATE_ENDED)) {
+
+                        WritableMap event = Arguments.createMap();
+                        mVideoDuration = getDuration();
+                        event.putDouble(EVENT_PROP_CURRENT_TIME, getCurrentPosition() / 1000.0);
+                        event.putDouble(EVENT_PROP_BUFFER_POSITION, getBufferedPosition() / 1000.0);
+                        event.putDouble(EVENT_PROP_BUFFER_PERCENT, getBufferPercentage());
+                        event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoDuration / 1000.0); //TODO:mBufferUpdateRunnable
+                        mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
+                    }
                 }
 
-                if (mMediaPlayerValid) {
-                    this.count++;
-                    if (this.count>=4) {
-                        boolean foreground = false;
-                        try {
-                            foreground = new ForegroundCheckTask().execute(mThemedReactContext).get();
-                        } catch (Exception ex) {
-                            FullLog.e( ex.getMessage());
-                        }
-                        //TODO : need improve
-                        //                    Log.d("ReactVideoView","foreground "+ foreground);
-                        if (!foreground) {
-                            mMediaPlayerValid = false;
-                            pause();
-                            return;
-                        }
-                        this.count = 0;
-                    }
-                    WritableMap event = Arguments.createMap();
-                    mVideoDuration = getDuration();
-                    event.putDouble(EVENT_PROP_CURRENT_TIME, getCurrentPosition() / 1000.0);
-                    event.putDouble(EVENT_PROP_BUFFER_PERCENT, getBufferPercentage());
-                    event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoDuration / 1000.0); //TODO:mBufferUpdateRunnable
-                    mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
-                }
                 mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 1000);
             }
         };
         mProgressUpdateHandler.post(mProgressUpdateRunnable);
     }
+
 
     public void setSrc(String src,boolean runOnLoad) {
         FullLog.d("setSrc: " + src);
@@ -242,6 +209,7 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
         FullLog.d("onPreparedListener");
         mMediaPlayerValid = true;
         mVideoDuration = mMediaPlayer.getDuration();
+        mStarted = true;
 
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, mVideoDuration / 1000.0);
@@ -255,7 +223,9 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
         event.putBoolean(EVENT_PROP_STEP_BACKWARD, true);
         event.putBoolean(EVENT_PROP_STEP_FORWARD, true);
 
-        event.putInt(EVENT_PROP_SELECTED_VIDEO_TRACKS, getSelectedTrack(DemoPlayer.TYPE_VIDEO));
+        event.putInt(EVENT_PROP_SELECTED_VIDEO_TRACK, getSelectedTrack(DemoPlayer.TYPE_VIDEO));
+        event.putInt(EVENT_PROP_SELECTED_AUDIO_TRACK, getSelectedTrack(DemoPlayer.TYPE_AUDIO));
+        event.putInt(EVENT_PROP_SELECTED_TEXT_TRACK, getSelectedTrack(DemoPlayer.TYPE_TEXT));
 
         WritableArray videoTracks = Arguments.createArray();
         String[] trackNameArray= getTrackNameArray(DemoPlayer.TYPE_VIDEO);

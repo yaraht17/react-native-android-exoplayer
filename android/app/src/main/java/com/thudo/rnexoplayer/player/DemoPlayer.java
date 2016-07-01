@@ -257,6 +257,7 @@ public class DemoPlayer implements ExoPlayer.Listener, ChunkSampleSource.EventLi
   }
 
   public void setSelectedTrack(int type, int index) {
+
     player.setSelectedTrack(type, index);
 
     if (type == TYPE_TEXT && index < 0 && captionListener != null) {
