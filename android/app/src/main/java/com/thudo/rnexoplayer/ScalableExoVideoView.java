@@ -784,8 +784,8 @@ public class ScalableExoVideoView extends TextureView implements TextureView.Sur
 
     public long getDuration() {
         if (isInPlaybackState()) {
-            if (mDuration > 0)
-                return mDuration;
+//            if (mDuration > 0)
+//                return mDuration;
             mDuration = mMediaPlayer.getDuration() ;
             return mDuration;
         }

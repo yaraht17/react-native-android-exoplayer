@@ -159,6 +159,7 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
         WritableMap event = Arguments.createMap();
         event.putMap(RNExoVideoViewManager.PROP_SRC, srcRet);
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD_START.toString(), event);
+        release();
         setRunOnLoad(runOnLoad);
         setVideoPath(src);
 
