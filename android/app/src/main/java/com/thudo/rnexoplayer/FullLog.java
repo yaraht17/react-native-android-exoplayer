@@ -9,7 +9,7 @@ public class FullLog {
     public final static boolean VERBOSE = true;
 
     public static void d(String message, Object... args) {
-        if (DEBUG) {
+        if (DEBUG && BuildConfig.DEBUG) {
             String fullClassName = Thread.currentThread().getStackTrace()[3].getClassName();
             String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1);
             String methodName = Thread.currentThread().getStackTrace()[3].getMethodName();
@@ -20,7 +20,7 @@ public class FullLog {
     }
 
     public static void i(String message, Object... args) {
-        if (INFOR) {
+        if (INFOR && BuildConfig.DEBUG) {
             String fullClassName = Thread.currentThread().getStackTrace()[3].getClassName();
             String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1);
             String methodName = Thread.currentThread().getStackTrace()[3].getMethodName();
@@ -31,7 +31,7 @@ public class FullLog {
     }
 
     public static void e(String message, Object... args) {
-        if (ERROR) {
+        if (ERROR && BuildConfig.DEBUG) {
             String fullClassName = Thread.currentThread().getStackTrace()[3].getClassName();
             String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1);
             String methodName = Thread.currentThread().getStackTrace()[3].getMethodName();
@@ -42,7 +42,7 @@ public class FullLog {
     }
 
     public static void w(String message, Object... args) {
-        if (WARNING) {
+        if (WARNING && BuildConfig.DEBUG) {
             String fullClassName = Thread.currentThread().getStackTrace()[3].getClassName();
             String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1);
             String methodName = Thread.currentThread().getStackTrace()[3].getMethodName();
@@ -53,7 +53,7 @@ public class FullLog {
     }
 
     public static void v(String message, Object... args) {
-        if (VERBOSE) {
+        if (VERBOSE && BuildConfig.DEBUG) {
             String fullClassName = Thread.currentThread().getStackTrace()[3].getClassName();
             String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1);
             String methodName = Thread.currentThread().getStackTrace()[3].getMethodName();

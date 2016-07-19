@@ -2,19 +2,19 @@ package com.thudo.rnexoplayer;
 
 import android.app.Activity;
 
-import com.thudo.rnexoplayer.RNExoVideoView.Events;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.annotations.ReactProp;
+import com.thudo.rnexoplayer.RNExoVideoView.Events;
 import com.thudo.rnexoplayer.player.DemoPlayer;
 
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
-public class RNExoVideoViewManager extends SimpleViewManager<RNExoVideoView> {
+public class RNExoVideoViewManager extends SimpleViewManager<RNExoVideoView>  {
 
     public static final String REACT_CLASS = "ExoVideo";
 
