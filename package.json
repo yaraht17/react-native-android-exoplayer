@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "dependencies": {
+    "keymirror": "^0.1.1"
+  },
   "author": "Phuongtq <tranphuong.080@gmail.com> (http://innerpeace.ddns.net)",
   "license": "ISC"
 }

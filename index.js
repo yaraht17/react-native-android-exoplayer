@@ -1,12 +1,10 @@
-const React = require('react-native');
+import React,{Component,PropTypes} from 'react';
 const {
-  Component,
   StyleSheet,
   requireNativeComponent,
-  PropTypes,
   NativeModules,
   View,
-} = React;
+} = require('react-native');
 
 const VideoResizeMode = require('./VideoResizeMode');
 
