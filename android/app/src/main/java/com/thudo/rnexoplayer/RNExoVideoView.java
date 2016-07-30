@@ -230,26 +230,31 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
 
         WritableArray videoTracks = Arguments.createArray();
         String[] trackNameArray= getTrackNameArray(DemoPlayer.TYPE_VIDEO);
-        for (String trackName :
-                trackNameArray) {
-            videoTracks.pushString(trackName);
-        }
+        if (trackNameArray != null)
+            for (String trackName :
+                    trackNameArray) {
+                videoTracks.pushString(trackName);
+            }
+
         event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTracks);
 
         WritableArray audioTracks = Arguments.createArray();
         trackNameArray= getTrackNameArray(DemoPlayer.TYPE_AUDIO);
-        for (String trackName :
-                trackNameArray) {
-            audioTracks.pushString(trackName);
-        }
+
+        if (trackNameArray != null)
+            for (String trackName :
+                    trackNameArray) {
+                audioTracks.pushString(trackName);
+            }
         event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTracks);
 
         WritableArray textTracks = Arguments.createArray();
         trackNameArray= getTrackNameArray(DemoPlayer.TYPE_TEXT);
-        for (String trackName :
-                trackNameArray) {
-            textTracks.pushString(trackName);
-        }
+        if (trackNameArray != null)
+            for (String trackName :
+                    trackNameArray) {
+                textTracks.pushString(trackName);
+            }
         event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks);
 
 
