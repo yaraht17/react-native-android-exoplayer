@@ -74,7 +74,7 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
 
     public static final String EVENT_PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
     public static final String EVENT_PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
-    public static final String EVENT_PROP_SELECTED_TEXT_TRACK = "selectedTextTracks";
+    public static final String EVENT_PROP_SELECTED_TEXT_TRACK = "selectedTextTrack";
 
 
     public static final String EVENT_PROP_ERROR = "error";
