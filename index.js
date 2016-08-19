@@ -29,7 +29,9 @@ class ExoVideo extends Component {
   }
 
   setNativeProps(nativeProps) {
-    this._root.setNativeProps(nativeProps);
+    if (this._root ) {
+      this._root.setNativeProps(nativeProps);
+    }
   }
 
   seek(time) {
