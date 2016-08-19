@@ -65,14 +65,6 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/main/jni" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/main/rs" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/main/shaders" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/res" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/resources" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/assets" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/aidl" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/jni" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/rs" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/shaders" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/test/res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/test/assets" type="java-test-resource" />
@@ -81,6 +73,14 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/test/jni" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/test/rs" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/test/shaders" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/res" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/assets" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/aidl" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/jni" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/rs" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/src/androidTest/shaders" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/build/intermediates/assets" />
       <excludeFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/build/intermediates/blame" />
       <excludeFolder url="file://$MODULE_DIR$/../../../SCTVFilms/node_modules/react-native-android-exoplayer/exoplayer/build/intermediates/bundles" />
