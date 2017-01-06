@@ -81,7 +81,6 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
     public static final String EVENT_PROP_WHAT = "what";
     public static final String EVENT_PROP_EXTRA = "extra";
 
-    Activity mActivity;
     private ThemedReactContext mThemedReactContext;
     private RCTEventEmitter mEventEmitter;
 
@@ -107,11 +106,10 @@ public class RNExoVideoView extends ScalableExoVideoView implements ScalableExoV
     private boolean mStarted = false;
 
 
-    RNExoVideoView(ThemedReactContext themedReactContext ,Activity activity){
-        super(themedReactContext,activity);
+    RNExoVideoView(ThemedReactContext themedReactContext){
+        super(themedReactContext,themedReactContext.getCurrentActivity());
         FullLog.d("RNExoVideoView");
         mThemedReactContext = themedReactContext;
-        mActivity = activity;
         mEventEmitter = themedReactContext.getJSModule(RCTEventEmitter.class);
         setListener(this);
         mProgressUpdateRunnable = new Runnable() {

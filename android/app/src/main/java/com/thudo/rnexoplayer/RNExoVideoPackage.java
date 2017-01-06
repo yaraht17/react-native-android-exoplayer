@@ -13,10 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class RNExoVideoPackage implements ReactPackage {
-    private Activity _activity;
-    public RNExoVideoPackage(Activity activity){
-        _activity = activity;
-    }
+
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         return Collections.emptyList();
@@ -29,6 +26,6 @@ public class RNExoVideoPackage implements ReactPackage {
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Arrays.<ViewManager>asList(new RNExoVideoViewManager(_activity));
+        return Arrays.<ViewManager>asList(new RNExoVideoViewManager());
     }
 }

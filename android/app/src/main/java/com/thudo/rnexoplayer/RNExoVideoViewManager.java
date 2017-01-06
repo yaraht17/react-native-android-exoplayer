@@ -35,10 +35,6 @@ public class RNExoVideoViewManager extends SimpleViewManager<RNExoVideoView>  {
     public static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
     public static final String PROP_SELECTED_TEXT_TRACK = "selectedTextTrack";
 
-    private Activity _activity;
-    public RNExoVideoViewManager(Activity activity){
-        _activity=activity;
-    }
 
     @Override
     public String getName() {
@@ -47,7 +43,7 @@ public class RNExoVideoViewManager extends SimpleViewManager<RNExoVideoView>  {
 
     @Override
     protected RNExoVideoView createViewInstance(ThemedReactContext themedReactContext) {
-        return new RNExoVideoView(themedReactContext,_activity);
+        return new RNExoVideoView(themedReactContext);
     }
 
     @Override
