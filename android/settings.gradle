@@ -1,3 +1,4 @@
+rootProject.name = 'react-native-android-exoplayer'
 include ':app'
 
 include ':exoplayer'
