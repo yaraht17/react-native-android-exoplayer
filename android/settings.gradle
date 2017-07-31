@@ -1,4 +1,4 @@
 include ':app'
 
 include ':exoplayer'
-project(':exoplayer').projectDir = new File(settingsDir, '../exoplayer')
+project(':exoplayer').projectDir = new File(rootProject.projectDir, '../exoplayer')
